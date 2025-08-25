@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 LIB_PVD=$1
 if [ -z "$LIB_PVD" ]; then
@@ -10,15 +10,12 @@ fi
 cd $LIB_PVD
 OLD_IFS=IFS
 IFS=/
-find -maxdepth 3 -mindepth 3 -type f | while read DOT ARTIST ALBUM TRACK; do
-IFS=OLD_IFS
-TARGET_TRACK="$ARTIST/$ALBUM/$TRACK"
-echo $DOT
-echo $TARGET_TRACK
-RUN="ffmpeg -i $TARGET_TRACK -metadata title="$TRACK" -metadata artist="$ARTIST" -metadata author="$ARTIST" -metadata album="$ALBUM" -c copy tmp$TRACK"
-echo $RUN
-ffmpeg -i "$TARGET_TRACK" -metadata title="$TRACK" -metadata artist="$ARTIST" -metadata author="$ARTIST" -metadata album="$ALBUM" -c copy "tmp$TRACK"
-mv "tmp$TRACK" "$TARGET_TRACK"
-IFS=/
+find -maxdepth 3 -mindepth 3 -type f -iname '*.mp3' | while read -r DOT ARTIST ALBUM TRACK; do
+	IFS=$OLD_IFS
+	TARGET_TRACK="$ARTIST/$ALBUM/$TRACK"
+	echo -E author="$ARTIST" artist="$ARTIST" album="$ALBUM" title="$TRACK"
+	echo -E "$TARGET_TRACK"
+	yes | ffmpeg -i "$TARGET_TRACK" -nostdin -metadata title="$TRACK" -metadata artist="$ARTIST" -metadata author="$ARTIST" -metadata album="$ALBUM" -c copy "tmp$TRACK" 2>/dev/null
+	mv "tmp$TRACK" "$TARGET_TRACK"
+	IFS=/
 done
-IFS=OLD_IFS
